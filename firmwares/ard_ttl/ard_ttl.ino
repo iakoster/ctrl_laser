@@ -52,10 +52,37 @@ void setup()
 
 void loop() {
   ledControl();
-  //rxUart();
+  rxUart();
 }
-//
-//
+
+
+void rxUart() {
+  if (Serial.available() >= uart_format.min_length) {
+    Serial.flush();
+
+    uint8_t rx_response = Serial.read();
+    uint8_t rx_address = Serial.read();
+    uint8_t rx_operation = Serial.read();
+    uint8_t rx_data_length = Serial.read();
+
+    if (rx_operation == uart_format.READ) {
+      // readMemory
+    } else if (rx_operation == uart_format.WRITE) {
+      uint8_t rx_data[rx_data_length];
+      Serial.readBytes(rx_data, rx_data_length);
+      // writeMemory
+    } else {
+      // error with invalid operation
+    }
+    
+  }
+}
+
+
+void txUart() {
+  
+}
+
 //void rxUart() {
 //
 //    if (Serial.available() >= uart_format.min_length)
