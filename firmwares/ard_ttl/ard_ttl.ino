@@ -1,12 +1,12 @@
 #include <GyverTimers.h>
 
 // Информация о прошивке
-#define version_ (0 << 16) + (0 << 8) + 1 // мажор, минор и патч версии
-#define last_update (2022 << 16) + (10 << 8) + 26 // Дата последнего обновления
+#define version_ (0 << 8) + 1 // мажор, минор версии
+#define last_update 20221027 // дата последнего обновления
 
 
-#define pin_ttl_out 4 // Номер пин программного ШИМ
-#define pin_led_out 13 // Пин LED
+#define pin_ttl_out 4 // номер пин программного ШИМ
+#define pin_led_out 13 // пин LED
 
 #define timer_frequency 50000 // частота таймера, Гц (макс следование импульсов freq/2)
 
@@ -16,32 +16,33 @@ struct {
   enum {READ, WRITE} operation; // индексы операций
   enum {
     OK,
-    INVALID_OPERATION
+    INVALID_OPERATION,
+    INVALID_ADDRESS
   } response; // коды ответов(ошибок)
-} uart_format; // Формат сообщений UART
+} uart_format; // формат сообщений UART
 
 
 struct {
 
-  enum {OFF, SINGLE, PERIODIC} regime = OFF; // Режим работы лазера
-  uint16_t pulse_width = 1; // Ширина импульса
-  uint16_t pulse_period = 0.02 * timer_frequency - 1; //  50 Гц. -1 т.к. есть такт между pulse_period и 0
+  enum {OFF, SINGLE, PERIODIC} regime = OFF; // режим работы лазера
+  uint32_t pulse_width = 1; // ширина импульса
+  uint32_t pulse_period = 0.02 * timer_frequency - 1; //  50 Гц. -1 т.к. есть такт между pulse_period и 0
 
 } state;
 
-volatile uint16_t timer_ticks = 0; // Счетчик прерываний таймера
+volatile uint32_t timer_ticks = 0; // счетчик прерываний таймера
 
 
 void setup()
 {
 
-    Timer2.setFrequency(timer_frequency); // Устанавить частоту таймера
-    Timer2.enableISR(); // Включаем прерывания таймера 2
+    Timer2.setFrequency(timer_frequency); // устанавить частоту таймера
+    Timer2.enableISR(); // включаем прерывания таймера 2
     
-    pinMode(pin_ttl_out, OUTPUT); // Инициализируем пин ШИМ сигнала
-    pinMode(pin_led_out, OUTPUT); // Инициализируем пин LED
+    pinMode(pin_ttl_out, OUTPUT); // инициализируем пин ШИМ сигнала
+    pinMode(pin_led_out, OUTPUT); // инициализируем пин LED
     
-    Serial.begin(9600); // Частота UART (baudrate)
+    Serial.begin(9600); // частота UART (baudrate)
     Serial.setTimeout(250);
     
 }
@@ -69,10 +70,67 @@ void rxUart() {
       Serial.readBytes(rx_data, rx_data_length);
       // writeMemory
     } else {
-      // error with invalid operation
+      uint8_t data[0] = {};
+      txUart(uart_format.INVALID_OPERATION, rx_address, rx_operation, 0, data);
     }
     
   }
+}
+
+
+void readMemory(uint8_t address) {
+
+  uint8_t *data;
+
+  switch (address) {
+    
+    case 0x03: // версия прошивки
+      data = new uint8_t[4];
+      for (uint8_t i = 0; i < 4; i++) {
+        data[i] = version_ >> 8*(3-i) & 0xff;
+      }
+      break;
+    
+    case 0x04: // дата последнего апдейта
+      data = new uint8_t[4];
+      for (uint8_t i = 0; i < 4; i++) {
+        data[i] = last_update >> 8*(3-i) & 0xff;
+      }
+      break;
+
+    case 0x05: // Частота таймера
+      data = new uint8_t[4];
+      for (uint8_t i = 0; i < 4; i++) {
+        data[i] = timer_frequency >> 8*(3-i) & 0xff;
+      }
+      break;
+
+    case 0x10: // режим работы лазера
+      data = new uint8_t {state.regime};
+      break;
+
+    case 0x11: // период импульсов
+      data = new uint8_t[4];
+      for (uint8_t i = 0; i < 4; i++) {
+        data[i] = (state.pulse_period + 1) >> 8*(3-i) & 0xff;
+      }
+      break;
+
+    case 0x12: // ширина импульсов
+      data = new uint8_t[4];
+      for (uint8_t i = 0; i < 4; i++) {
+        data[i] = state.pulse_width >> 8*(3-i) & 0xff;
+      }
+      break;
+
+    default: // ошибка чтения адреса
+      data = new uint8_t[0];
+      break;
+    
+  }
+
+  txUart(uart_format.OK, address, uart_format.READ, sizeof(data), data);
+  
 }
 
 
@@ -97,8 +155,8 @@ void txUart(
   Serial.write(message, sizeof(message));
   
 }
-//
-//
+
+
 //void writeMemory(uint8_t address, uint16_t data_len, uint8_t *data) {
 //
 //  uint8_t operation = uart_format.ANSWER_WRITE;
@@ -138,11 +196,6 @@ void txUart(
 //
 //  txUart(address, operation, data_len, data);
 //
-//}
-//
-//void updatePulseStartEnd() {
-//  state.pulse_start = state.pulse_offset;
-//  state.pulse_end = (state.pulse_offset + state.pulse_width) % (state.pulse_period + 1);
 //}
 //
 //
