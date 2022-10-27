@@ -1,34 +1,31 @@
 #include <GyverTimers.h>
 
 // Информация о прошивке
-#define ver_global 0 // Глобальная версия
-#define ver_major 0 // Мажор версия
-#define ver_minor 1 // Минор версия
-#define ver_patch 0 // Патч версия
+#define version_ (0 << 16) + (0 << 8) + 1 // мажор, минор и патч версии
 #define last_update (2022 << 16) + (10 << 8) + 26 // Дата последнего обновления
 
 
 #define pin_ttl_out 4 // Номер пин программного ШИМ
 #define pin_led_out 13 // Пин LED
-#define led_blink_multiplier 49 // Сколько нужно импульсов для морграния светодиода
 
 #define timer_frequency 50000 // частота таймера, Гц (макс следование импульсов freq/2)
 
 
 struct {
-  uint8_t min_length = 5; // минимальная длина сообщения
+  uint8_t min_length = 4; // минимальная длина сообщения
   enum {READ, WRITE} operation; // индексы операций
+  enum {
+    OK,
+    INVALID_OPERATION
+  } response; // коды ответов(ошибок)
 } uart_format; // Формат сообщений UART
 
 
 struct {
 
   enum {OFF, SINGLE, PERIODIC} regime = OFF; // Режим работы лазера
-  uint16_t pulse_offset = 0; // Смещение импульса
   uint16_t pulse_width = 1; // Ширина импульса
-  uint16_t pulse_start = 0; // Старт импульса
-  uint16_t pulse_end = 1; // Конец импульса
-  uint16_t pulse_period = 0.02 * timer_frequency - 1; //  50 Гц (при 50кГц таймере). Меньше на 1 т.к. есть такт между 999 и 0
+  uint16_t pulse_period = 0.02 * timer_frequency - 1; //  50 Гц. -1 т.к. есть такт между pulse_period и 0
 
 } state;
 
@@ -79,42 +76,27 @@ void rxUart() {
 }
 
 
-void txUart() {
+void txUart(
+  uint8_t response,
+  uint8_t address,
+  uint8_t operation,
+  uint8_t data_length,
+  uint8_t *data
+  ) {
+    
+  uint8_t message[uart_format.min_length + data_length];
+  message[0] = response;
+  message[1] = address;
+  message[2] = operation;
+  message[3] = data_length;
+
+  for (uint8_t i=0; i < data_length; i++) {
+    message[uart_format.min_length + i] = data[i];
+  }
+
+  Serial.write(message, sizeof(message));
   
 }
-
-//void rxUart() {
-//
-//    if (Serial.available() >= uart_format.min_length)
-//  {
-//    Serial.flush();
-//    uint16_t rx_preamble = (Serial.read() << 8) + Serial.read();
-//    if (rx_preamble != uart_format.preamble) { 
-//      uint8_t data[1] = {0x10}; // preamble error
-//      txUart(0x00, uart_format.ANSWER_ERROR, 1, data);
-//      delete data;
-//      return;
-//    }
-//
-//    uint8_t rx_address = Serial.read();
-//    uint8_t rx_operation = Serial.read();
-//    uint8_t rx_data_len = Serial.read();
-//
-//    if (rx_operation == uart_format.RX_READ) {
-//      readMemory(rx_address);
-//    } else if (rx_operation == uart_format.RX_WRITE) {
-//      uint8_t rx_data[rx_data_len];
-//      Serial.readBytes(rx_data, rx_data_len);
-//      writeMemory(rx_address, rx_data_len, rx_data);
-//    } else {
-//      uint8_t data[1] = {0x11}; // operation error
-//      txUart(rx_address, uart_format.ANSWER_ERROR, 1, data);
-//      delete data;
-//    }
-//    
-//  }
-//
-//}
 //
 //
 //void writeMemory(uint8_t address, uint16_t data_len, uint8_t *data) {
