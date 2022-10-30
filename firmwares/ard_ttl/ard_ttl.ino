@@ -185,45 +185,37 @@ void txUart(
   Serial.write(message, sizeof(message));
   
 }
-//
-//
-//void timerTick() {
-//  
-//
-// if (timer_ticks == state.pulse_start && state.regime != state.OFF && state.laser_enabled) {
-//    digitalWriteFast(pin_ttl_out, HIGH);
-// } else if (timer_ticks == state.pulse_end) {
-//    digitalWriteFast(pin_ttl_out, LOW);
-//    if (state.regime == state.SINGLE | state.regime == state.SINGLE_SYNC) {
-//      state.laser_enabled = false;
-//    }
-// } else if (timer_ticks == state.pulse_period) {
-//    timer_ticks = 0;
-//    timer_ticks--;
-//    state.synced = false;
-// } else if (state.regime == state.OFF && !state.laser_enabled) {
-//    digitalWriteFast(pin_ttl_out, LOW);
-// }
-// 
-// timer_ticks++;
-//
-//}
-//
-//
-//ISR(TIMER2_A) {
-//  timerTick();
-//}
-//
-//
-//void syncTrigger() {
-//
-// timer_ticks = 0;
-// sync_ticks_led++;
-// state.synced = true;
-//
-//}
-//
-//
+
+
+void timerTick() {
+
+  if (timer_ticks == 0 && state.regime != state.OFF) {
+    digitalWriteFast(pin_ttl_out, HIGH);
+    
+  } else if (timer_ticks == state.pulse_width) {
+    digitalWriteFast(pin_ttl_out, LOW);
+    if (state.regime == state.SINGLE) {
+      state.regime = state.OFF;
+    }
+    
+  } else if (timer_ticks == state.pulse_period) {
+    timer_ticks = 0;
+    timer_ticks--;
+    
+  } else if (state.regime == state.OFF) {
+    digitalWriteFast(pin_ttl_out, LOW);
+  }
+
+  timer_ticks++;
+
+}
+
+
+ISR(TIMER2_A) {
+  timerTick();
+}
+
+
 void ledControl() {
 
     if (timer_ticks){
