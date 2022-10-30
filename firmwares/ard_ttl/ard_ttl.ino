@@ -134,6 +134,36 @@ void readMemory(uint8_t address) {
 }
 
 
+void writeMemory(uint8_t address, uint8_t data_length, uint8_t *data) {
+
+  switch (address) {
+
+    case 0x10: // режим работы лазера
+      state.regime = data[0];
+      break;
+
+    case 0x11: // период импульсов
+      state.pulse_period = 0;
+      for (uint8_t i = 0; i < 4; i++) {
+        state.pulse_period += data[i] << (3 - i) * 8;
+      }
+
+    case 0x12: // ширина импульсов
+      state.pulse_width = 0;
+      for (uint8_t i = 0; i < 4; i++) {
+        state.pulse_width += data[i] << (3 - i) * 8;
+      }
+
+    default: // ошибка адреса записи
+      break;
+    
+  }
+
+  txUart(uart_format.OK, address, uart_format.WRITE, 0, {});
+  
+}
+
+
 void txUart(
   uint8_t response,
   uint8_t address,
@@ -155,154 +185,6 @@ void txUart(
   Serial.write(message, sizeof(message));
   
 }
-
-
-//void writeMemory(uint8_t address, uint16_t data_len, uint8_t *data) {
-//
-//  uint8_t operation = uart_format.ANSWER_WRITE;
-//
-//  switch (address)
-//  {
-//  
-//  case 0x0e: // Вкл/выкл лазер
-//    state.laser_enabled = data[0];
-//    break;
-//
-//  case 0x10: // режим работы лазера
-//    state.regime = data[0];
-//    break;
-//  
-//  case 0x11: // смещение импульса относительно начала периода
-//    state.pulse_offset = (data[0] << 8) + data[1];
-//    updatePulseStartEnd();
-//    break;
-//
-//  case 0x12: // ширина импульса
-//    state.pulse_width = (data[0] << 8) + data[1];
-//    updatePulseStartEnd();
-//    break;
-//
-//  case 0x13: // период импульсов
-//    state.pulse_period = (data[0] << 8) + data[1] - 1;
-//    updatePulseStartEnd();
-//    break;
-//  
-//  default: // ошибка адреса записи
-//    data = new uint8_t[1] {0x12};
-//    data_len = 1;
-//    operation = uart_format.ANSWER_ERROR;
-//    break;
-//  }
-//
-//  txUart(address, operation, data_len, data);
-//
-//}
-//
-//
-//void readMemory(uint8_t address) {
-//
-//  uint8_t operation = uart_format.ANSWER_READ;
-//  uint8_t *data;
-//  uint8_t data_len;
-//
-//  switch (address)
-//  {
-//  
-//  case 0x03: // Версия прошивки
-//    data = new uint8_t[4] {ver_global, ver_major, ver_minor, ver_patch};
-//    data_len = 4;
-//    break;
-//
-//  case 0x04: // Дата последнего апдейта
-//    data = new uint8_t[4];
-//    for (uint8_t i = 0; i < 4; i++) {
-//      data[i] = last_update >> 8*(3-i) & 0xff;
-//    }
-//    data_len = 4;
-//    break;
-//
-//  case 0x05: // Частота таймера
-//    data = new uint8_t[4];
-//    for (uint8_t i = 0; i < 4; i++) {
-//      data[i] = timer_frequency >> 8*(3-i) & 0xff;
-//    }
-//    data_len = 4;
-//    break;
-//  
-//  case 0x06: // Наличие синхронизации
-//    data = new uint8_t[1] {state.synced};
-//    data_len = 1;
-//    break;
-//  
-//  case 0x0e: // Вкл/выкл лазер
-//    data = new uint8_t[1] {state.laser_enabled};
-//    data_len = 1;
-//    break;
-//
-//  case 0x10: // режим работы лазера
-//    data = new uint8_t[1] {state.regime};
-//    data_len = 1;
-//    break;
-//
-//  case 0x11: // смещение импульса относительно начала периода
-//    data = new uint8_t[2] {state.pulse_offset >> 8, state.pulse_offset & 0xff};
-//    data_len = 2;
-//    break;
-//  
-//  case 0x12: // ширина импульса
-//    data = new uint8_t[2] {state.pulse_width >> 8, state.pulse_width & 0xff};
-//    data_len = 2;
-//    break;
-//
-//  case 0x13: // период импульсов
-//    data = new uint8_t[2] {(state.pulse_period + 1) >> 8, (state.pulse_period + 1) & 0xff};
-//    data_len = 2;
-//    break;
-//  
-//  case 0x14: // старт и конец импульса
-//    data = new uint8_t[4] {state.pulse_start >> 8, state.pulse_start & 0xff,
-//                           state.pulse_end >> 8, state.pulse_end & 0xff};
-//    data_len = 4;
-//    break;
-//  
-//  default: // ошибка адреса чтения
-//    data = new uint8_t[1] {0x12};
-//    data_len = 1;
-//    operation = uart_format.ANSWER_ERROR;
-//    break;
-//
-//  }
-//
-//  txUart(address, operation, data_len, data);
-//
-//}
-//
-//void txUart(uint8_t address, uint8_t operation, uint8_t data_len, uint8_t *data) {
-//
-//  uint8_t message[data_len + uart_format.min_length];
-//  message[0] = uart_format.preamble >> 8;
-//  message[1] = uart_format.preamble & 0xff;
-//
-//  message[2] = address;
-//  message[3] = operation;
-//  message[4] = data_len;
-//  for (uint8_t i=0; i < data_len; i++) {
-//    message[i + uart_format.min_length] = data[i];
-//  }
-//
-//  Serial.write(message, sizeof(message));
-//
-//}
-//
-//// uint8_t *uint2Bytes(uint64_t var, uint8_t bytes_count) {
-////   uint8_t bytes[bytes_count];
-////   for (uint8_t i = 0; i < bytes_count; i++) {
-////     bytes[i] = var & 0xff;
-////     var = var >> 8;
-////   }
-////   return bytes;
-//
-//// }
 //
 //
 //void timerTick() {
