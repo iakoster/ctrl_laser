@@ -4,6 +4,11 @@ from typing import Any
 from pyinstr_iakoster.communication import Connection, Message
 
 
+__all__ = [
+    "UART",
+]
+
+
 class UART(Connection):
 
     _hapi: serial.Serial

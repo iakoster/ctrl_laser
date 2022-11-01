@@ -8,6 +8,10 @@ from pyinstr_iakoster.communication import (
     FieldSetter,
 )
 
+__all__ = [
+    "PF",
+]
+
 
 PF = PackageFormat(
     RegisterMap(
