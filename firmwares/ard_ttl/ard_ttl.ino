@@ -17,7 +17,8 @@ struct {
   enum {
     OK,
     INVALID_OPERATION,
-    INVALID_ADDRESS
+    INVALID_ADDRESS,
+    INVALID_DATA,
   } response; // коды ответов(ошибок)
 } uart_format; // формат сообщений UART
 
@@ -25,6 +26,7 @@ struct {
 struct {
 
   enum {OFF, SINGLE, PERIODIC} regime = OFF; // режим работы лазера
+  uint8_t regimes_count = 3; // количество возможных режимов
   uint32_t pulse_width = 1; // ширина импульса
   uint32_t pulse_period = 0.02 * timer_frequency - 1; //  50 Гц. -1 т.к. есть такт между pulse_period и 0
 
@@ -114,40 +116,54 @@ void readMemory(uint8_t address) {
     
   }
 
-  
+  // Serial.write(state.regime);
   uint8_t data[4];
   for (uint8_t i = 0; i < 4; i++) {
     data[i] = value >> 8*(3-i) & 0xff;
   }
-
   txUart(response, address, uart_format.READ, sizeof(data), data);
   
 }
 
 
-void writeMemory(uint8_t address, uint8_t *data) {
+void writeMemory(uint8_t address, uint8_t *rx_data) {
 
+  uint32_t value;
   uint8_t response = uart_format.OK;
 
   switch (address) {
 
     case 0x10: // режим работы лазера
-      state.regime = data[3];
+      if (rx_data[3] < state.regimes_count) {
+        state.regime = rx_data[3];
+      } else {
+        response = uart_format.INVALID_DATA;
+      }
+      
+      value = state.regime;
       break;
 
     case 0x11: // период импульсов
       state.pulse_period = 0;
       for (uint8_t i = 0; i < 4; i++) {
-        state.pulse_period += data[i] << (3 - i) * 8;
+        state.pulse_period += rx_data[i] << (3 - i) * 8;
       }
       state.pulse_period -= 1;
+      
+      value = state.pulse_period + 1;
       break;
 
     case 0x12: // ширина импульсов
       state.pulse_width = 0;
       for (uint8_t i = 0; i < 4; i++) {
-        state.pulse_width += data[i] << (3 - i) * 8;
+        state.pulse_width += rx_data[i] << (3 - i) * 8;
       }
+      
+      if (state.pulse_width > state.pulse_period - 1) {
+        state.pulse_width = state.pulse_period - 1;
+      }
+      
+      value = state.pulse_width;
       break;
 
     default: // ошибка адреса записи
@@ -156,7 +172,12 @@ void writeMemory(uint8_t address, uint8_t *data) {
     
   }
 
-  txUart(response, address, uart_format.WRITE, 0, {});
+  uint8_t tx_data[4];
+  for (uint8_t i = 0; i < 4; i++) {
+    tx_data[i] = value >> 8*(3-i) & 0xff;
+  }
+
+  txUart(response, address, uart_format.WRITE, 4, tx_data);
   
 }
 

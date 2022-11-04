@@ -32,7 +32,7 @@ class UART(Connection):
             timeout=timeout,
             xonxoff=False,
             rtscts=False,
-            dsrdtr=True
+            dsrdtr=True,
         )
         super().__init__(hapi, address="PC", logger="self")
 
