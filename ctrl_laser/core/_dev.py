@@ -53,7 +53,7 @@ class Arduino(object):
         ).data.unpack()[0]
 
     def send(self, msg: Message) -> Message:
-        msg.set_addresses(src="PC", dst=self.address)
+        msg.set_src_dst(src="PC", dst=self.address)
         return self._con.send(msg)
 
     def write_regime(self, regime: int) -> int:
@@ -78,4 +78,7 @@ class Arduino(object):
     @property
     def connection(self) -> UART:
         return self._con
+
+    def __del__(self) -> None:
+        self._con.close()
 

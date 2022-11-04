@@ -150,6 +150,7 @@ void writeMemory(uint8_t address, uint8_t *rx_data) {
       }
       state.pulse_period -= 1;
 
+      validatePulsePeriod();
       validatePulseWidth();
       
       value = state.pulse_period + 1;
@@ -226,6 +227,13 @@ void timerTick() {
 
   timer_ticks++;
 
+}
+
+
+void validatePulsePeriod() {
+  if (state.pulse_period < 2) {
+    state.pulse_period = 2;
+  }
 }
 
 
