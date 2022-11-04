@@ -20,7 +20,7 @@ PF = PackageFormat(
             data=[
                 [None, "firmware_ver", "std", 0x03, "ro", 4, None, ""],
                 [None, "update_date", "std", 0x04, "ro", 4, None, ""],
-                [None, "frequency", "std", 0x05, "ro", 4, None, ""],
+                [None, "timer_frequency", "std", 0x05, "ro", 4, None, ""],
                 [None, "regime", "std", 0x10, "rw", 1, "B", ""],
                 [None, "pulse_period", "std", 0x11, "rw", 4, None, ""],
                 [None, "pulse_width", "std", 0x12, "rw", 4, None, ""]
