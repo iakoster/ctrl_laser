@@ -64,14 +64,13 @@ void rxUart() {
     uint8_t rx_data_length = Serial.read();
 
     if (rx_operation == uart_format.READ) {
-      // readMemory
+      readMemory(rx_address);
     } else if (rx_operation == uart_format.WRITE) {
       uint8_t rx_data[rx_data_length];
       Serial.readBytes(rx_data, rx_data_length);
-      // writeMemory
+      writeMemory(rx_address, rx_data);
     } else {
-      uint8_t data[0] = {};
-      txUart(uart_format.INVALID_OPERATION, rx_address, rx_operation, 0, data);
+      txUart(uart_format.INVALID_OPERATION, rx_address, rx_operation, 0, {});
     }
     
   }
@@ -80,66 +79,60 @@ void rxUart() {
 
 void readMemory(uint8_t address) {
 
-  uint8_t *data;
+  uint32_t value;
+  uint8_t response = uart_format.OK;
 
   switch (address) {
     
     case 0x03: // версия прошивки
-      data = new uint8_t[4];
-      for (uint8_t i = 0; i < 4; i++) {
-        data[i] = version_ >> 8*(3-i) & 0xff;
-      }
+      value = version_;
       break;
     
     case 0x04: // дата последнего апдейта
-      data = new uint8_t[4];
-      for (uint8_t i = 0; i < 4; i++) {
-        data[i] = last_update >> 8*(3-i) & 0xff;
-      }
+      value = last_update;
       break;
 
     case 0x05: // Частота таймера
-      data = new uint8_t[4];
-      for (uint8_t i = 0; i < 4; i++) {
-        data[i] = timer_frequency >> 8*(3-i) & 0xff;
-      }
+      value = timer_frequency;
       break;
 
     case 0x10: // режим работы лазера
-      data = new uint8_t {state.regime};
+      value = state.regime;
       break;
 
     case 0x11: // период импульсов
-      data = new uint8_t[4];
-      for (uint8_t i = 0; i < 4; i++) {
-        data[i] = (state.pulse_period + 1) >> 8*(3-i) & 0xff;
-      }
+      value = state.pulse_period + 1; // +1 т.к. компенсация такта между границей и 0
       break;
 
     case 0x12: // ширина импульсов
-      data = new uint8_t[4];
-      for (uint8_t i = 0; i < 4; i++) {
-        data[i] = state.pulse_width >> 8*(3-i) & 0xff;
-      }
+      value = state.pulse_width;
       break;
 
     default: // ошибка чтения адреса
-      data = new uint8_t[0];
+      response = uart_format.INVALID_ADDRESS;
       break;
     
   }
 
-  txUart(uart_format.OK, address, uart_format.READ, sizeof(data), data);
+  
+  uint8_t data[4];
+  for (uint8_t i = 0; i < 4; i++) {
+    data[i] = value >> 8*(3-i) & 0xff;
+  }
+
+  txUart(response, address, uart_format.READ, sizeof(data), data);
   
 }
 
 
-void writeMemory(uint8_t address, uint8_t data_length, uint8_t *data) {
+void writeMemory(uint8_t address, uint8_t *data) {
+
+  uint8_t response = uart_format.OK;
 
   switch (address) {
 
     case 0x10: // режим работы лазера
-      state.regime = data[0];
+      state.regime = data[3];
       break;
 
     case 0x11: // период импульсов
@@ -147,19 +140,23 @@ void writeMemory(uint8_t address, uint8_t data_length, uint8_t *data) {
       for (uint8_t i = 0; i < 4; i++) {
         state.pulse_period += data[i] << (3 - i) * 8;
       }
+      state.pulse_period -= 1;
+      break;
 
     case 0x12: // ширина импульсов
       state.pulse_width = 0;
       for (uint8_t i = 0; i < 4; i++) {
         state.pulse_width += data[i] << (3 - i) * 8;
       }
+      break;
 
     default: // ошибка адреса записи
+      response = uart_format.INVALID_ADDRESS;
       break;
     
   }
 
-  txUart(uart_format.OK, address, uart_format.WRITE, 0, {});
+  txUart(response, address, uart_format.WRITE, 0, {});
   
 }
 

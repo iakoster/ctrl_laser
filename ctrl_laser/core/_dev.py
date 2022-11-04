@@ -17,7 +17,7 @@ class Arduino(object):
         self._pf = PF
 
     def read_firmware_version(self) -> list[int]:
-        ans = self.send(self._pf["firmware_ver"].read(response=0))
+        ans = self.send(self._pf["firmware_ver"].read(response=0, data_length=b"\x00"))
         version = []
         for byte in ans.data.content:
             version.append(byte)
@@ -47,7 +47,7 @@ class Arduino(object):
         ).data.unpack()[0]
 
     def send(self, msg: Message) -> Message:
-        msg.set_addresses(src="PC", dst=self.a)
+        msg.set_addresses(src="PC", dst=self.address)
         return self._con.send(msg)
 
     def write_regime(self, regime: int) -> None:
