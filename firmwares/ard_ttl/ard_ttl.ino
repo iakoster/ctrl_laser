@@ -2,7 +2,7 @@
 
 // Информация о прошивке
 #define version_ (0 << 8) + 1 // мажор, минор версии
-#define last_update 20221027 // дата последнего обновления
+#define last_update 20221104 // дата последнего обновления
 
 
 #define pin_ttl_out 4 // номер пин программного ШИМ
@@ -149,6 +149,8 @@ void writeMemory(uint8_t address, uint8_t *rx_data) {
         state.pulse_period += rx_data[i] << (3 - i) * 8;
       }
       state.pulse_period -= 1;
+
+      validatePulseWidth();
       
       value = state.pulse_period + 1;
       break;
@@ -159,9 +161,7 @@ void writeMemory(uint8_t address, uint8_t *rx_data) {
         state.pulse_width += rx_data[i] << (3 - i) * 8;
       }
       
-      if (state.pulse_width > state.pulse_period - 1) {
-        state.pulse_width = state.pulse_period - 1;
-      }
+      validatePulseWidth();
       
       value = state.pulse_width;
       break;
@@ -226,6 +226,13 @@ void timerTick() {
 
   timer_ticks++;
 
+}
+
+
+void validatePulseWidth() {
+  if (state.pulse_width > state.pulse_period - 1) {
+    state.pulse_width = state.pulse_period - 1;
+  }
 }
 
 
