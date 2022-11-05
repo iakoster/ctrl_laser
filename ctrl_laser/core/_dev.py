@@ -16,6 +16,9 @@ class Arduino(object):
         self._con = UART(port)
         self._pf = PF
 
+    def close(self) -> None:
+        self._con.close()
+
     def read_firmware_version(self) -> list[int]:
         ans = self.send(
             self._pf["firmware_ver"].read(response=0, data_length=b"\x00")

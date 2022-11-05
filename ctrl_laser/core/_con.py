@@ -54,4 +54,4 @@ class UART(Connection):
 
     @staticmethod
     def get_available_com_ports() -> list[str]:
-        return [port.name for port in list_ports.comports()]
+        return sorted([port.name for port in list_ports.comports()])
