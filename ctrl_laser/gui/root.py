@@ -102,6 +102,30 @@ class UiRoot(Ui_root):
             self._port.addItems(port)
 
     @property
+    def pulse_period(self) -> int:
+        return self._pulse_period.value()
+
+    @pulse_period.setter
+    def pulse_period(self, period: int) -> None:
+        self._pulse_period.setValue(period)
+
+    @property
+    def pulse_width(self) -> int:
+        return self._pulse_width.value()
+
+    @pulse_width.setter
+    def pulse_width(self, width: int) -> None:
+        self._pulse_width.setValue(width)
+
+    @property
+    def regime(self) -> int:
+        return self._regime.currentIndex()
+
+    @regime.setter
+    def regime(self, regime: int) -> None:
+        self._regime.setCurrentIndex(regime)
+
+    @property
     def timer_frequency(self) -> int:
         return int(self._timer_frequency.text())
 
@@ -146,7 +170,40 @@ class WinRoot(QMainWindow):
             self.ui.connected(self.is_connected)
 
     def _attach_signals(self) -> None:
+
+        def read_regime() -> None:
+            self.ui.regime = self.dev.read_regime()
+
+        def read_pulse_period() -> None:
+            self.ui.pulse_period = self.dev.read_pulse_period()
+
+        def read_pulse_width() -> None:
+            self.ui.pulse_width = self.dev.read_pulse_width()
+
+        def write_regime() -> None:
+            self.ui.regime = self.dev.write_regime(self.ui.regime)
+
+        def write_regime_off() -> None:
+            self.ui.regime = self.dev.write_regime(0)
+
+        def write_pulse_period() -> None:
+            self.ui.pulse_period = self.dev.write_pulse_period(
+                self.ui.pulse_period
+            )
+
+        def write_pulse_width() -> None:
+            self.ui.pulse_width = self.dev.write_pulse_width(
+                self.ui.pulse_width
+            )
+
         self.ui.connect.clicked.connect(self.connect)
+        self.ui.set_regime_off.clicked.connect(write_regime_off)
+        self.ui.read_regime.clicked.connect(read_regime)
+        self.ui.read_pulse_period.clicked.connect(read_pulse_period)
+        self.ui.read_pulse_width.clicked.connect(read_pulse_width)
+        self.ui.write_regime.clicked.connect(write_regime)
+        self.ui.write_pulse_period.clicked.connect(write_pulse_period)
+        self.ui.write_pulse_width.clicked.connect(write_pulse_width)
 
     @property
     def is_connected(self) -> bool:
