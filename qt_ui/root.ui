@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>root</class>
+ <widget class="QMainWindow" name="root">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>352</width>
+    <height>235</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Управление лазером</string>
+  </property>
+  <widget class="QWidget" name="cwid">
+   <layout class="QGridLayout" name="cgrlay">
+    <item row="0" column="1">
+     <widget class="QPushButton" name="connect">
+      <property name="minimumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QComboBox" name="_port">
+      <property name="minimumSize">
+       <size>
+        <width>80</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="2">
+     <widget class="QLabel" name="pulse_period_title">
+      <property name="text">
+       <string>Период импульсов</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="2">
+     <widget class="QComboBox" name="_regime">
+      <property name="minimumSize">
+       <size>
+        <width>80</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <item>
+       <property name="text">
+        <string>Выкл.</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Одиночный</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Периодический</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="2" colspan="4">
+     <spacer name="hspc">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="5" column="5">
+     <widget class="QPushButton" name="set_regime_off">
+      <property name="text">
+       <string>Выкл.</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QLabel" name="_date">
+      <property name="text">
+       <string>Uknown</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QLabel" name="_timer_frequency">
+      <property name="text">
+       <string>Uknown</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="QLabel" name="timer_frequency_title">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Частота таймера</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="6">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="4">
+     <widget class="QPushButton" name="read_regime">
+      <property name="minimumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QLabel" name="_firmware_version">
+      <property name="text">
+       <string>Uknown</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="3">
+     <widget class="QPushButton" name="write_regime">
+      <property name="minimumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="2">
+     <widget class="QLabel" name="date_title">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Дата прошивки</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="2">
+     <widget class="QLabel" name="firmware_version_title">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Версия прошивки</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0" colspan="2">
+     <widget class="QLabel" name="regime_title">
+      <property name="text">
+       <string>Режим лазера</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="2">
+     <widget class="QLabel" name="pulse_width_title">
+      <property name="text">
+       <string>Ширина импульсов</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="2">
+     <widget class="QSpinBox" name="_pulse_period">
+      <property name="minimumSize">
+       <size>
+        <width>80</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="2">
+     <widget class="QSpinBox" name="_pulse_width">
+      <property name="minimumSize">
+       <size>
+        <width>80</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="3">
+     <widget class="QPushButton" name="write_pulse_period">
+      <property name="minimumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="4">
+     <widget class="QPushButton" name="read_pulse_period">
+      <property name="minimumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="3">
+     <widget class="QPushButton" name="write_pulse_width">
+      <property name="minimumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="4">
+     <widget class="QPushButton" name="read_pulse_width">
+      <property name="minimumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>23</width>
+        <height>23</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="mbar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>352</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="sbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
