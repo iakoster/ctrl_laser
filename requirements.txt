@@ -1,3 +1,4 @@
 pySerial
 pandas
+PyQt5
 git+https://github.com/iakoster/pyinstr_iakoster@connection
