@@ -1,14 +1,15 @@
 #include <GyverTimers.h>
 
 // Информация о прошивке
-#define version_ (0 << 8) + 1 // мажор, минор версии
-#define last_update 20221104 // дата последнего обновления
+#define version_ 0x02 // мажор, минор версии
+#define last_update 20221106 // дата последнего обновления
 
 
 #define pin_ttl_out 4 // номер пин программного ШИМ
 #define pin_led_out 13 // пин LED
 
-#define timer_frequency 50000 // частота таймера, Гц (макс следование импульсов freq/2)
+#define max_pulse_width 500 // максимальная ширина
+#define timer_frequency 100000 // частота таймера, Гц (макс следование импульсов freq/2)
 
 
 struct {
@@ -231,6 +232,7 @@ void timerTick() {
 
 
 void validatePulsePeriod() {
+  timer_ticks = 0;
   if (state.pulse_period < 2) {
     state.pulse_period = 2;
   }
@@ -240,6 +242,9 @@ void validatePulsePeriod() {
 void validatePulseWidth() {
   if (state.pulse_width > state.pulse_period - 1) {
     state.pulse_width = state.pulse_period - 1;
+  }
+  if (state.pulse_width > max_pulse_width) {
+    state.pulse_width = max_pulse_width;
   }
 }
 
