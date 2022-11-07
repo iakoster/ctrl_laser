@@ -1,8 +1,8 @@
 #include <GyverTimers.h>
 
 // Информация о прошивке
-#define version_ 0x02 // мажор, минор версии
-#define last_update 20221106 // дата последнего обновления
+#define version_ 0x0100 // версия прошивки
+#define last_update 20221107 // дата последнего обновления
 
 
 #define pin_ttl_out 4 // номер пин программного ШИМ
@@ -26,10 +26,10 @@ struct {
 
 struct {
 
-  enum {OFF, SINGLE, PERIODIC} regime = OFF; // режим работы лазера
+  enum {OFF, SINGLE, PERIODIC} regime = SINGLE; // режим работы лазера
   uint8_t regimes_count = 3; // количество возможных режимов
   uint32_t pulse_width = 1; // ширина импульса
-  uint32_t pulse_period = 0.02 * timer_frequency - 1; //  50 Гц. -1 т.к. есть такт между pulse_period и 0
+  uint32_t pulse_period = 0.01 * timer_frequency - 1; //  100 Гц. -1 т.к. есть такт между pulse_period и 0
 
 } state;
 
@@ -117,7 +117,6 @@ void readMemory(uint8_t address) {
     
   }
 
-  // Serial.write(state.regime);
   uint8_t data[4];
   for (uint8_t i = 0; i < 4; i++) {
     data[i] = value >> 8*(3-i) & 0xff;
@@ -208,8 +207,9 @@ void txUart(
 
 
 void timerTick() {
-
-  if (timer_ticks == 0 && state.regime != state.OFF) {
+  if (state.regime == state.OFF) {
+    digitalWriteFast(pin_ttl_out, LOW);
+  } else if (timer_ticks == 0) {
     digitalWriteFast(pin_ttl_out, HIGH);
     
   } else if (timer_ticks == state.pulse_width) {
@@ -218,12 +218,11 @@ void timerTick() {
       state.regime = state.OFF;
     }
     
-  } else if (timer_ticks == state.pulse_period) {
+  }
+
+  if (timer_ticks == state.pulse_period) {
     timer_ticks = 0;
     timer_ticks--;
-    
-  } else if (state.regime == state.OFF) {
-    digitalWriteFast(pin_ttl_out, LOW);
   }
 
   timer_ticks++;
@@ -233,15 +232,15 @@ void timerTick() {
 
 void validatePulsePeriod() {
   timer_ticks = 0;
-  if (state.pulse_period < 2) {
-    state.pulse_period = 2;
+  if (state.pulse_period == 0) {
+    state.pulse_period = 1;
   }
 }
 
 
 void validatePulseWidth() {
-  if (state.pulse_width > state.pulse_period - 1) {
-    state.pulse_width = state.pulse_period - 1;
+  if (state.pulse_width > state.pulse_period) {
+    state.pulse_width = state.pulse_period;
   }
   if (state.pulse_width > max_pulse_width) {
     state.pulse_width = max_pulse_width;
