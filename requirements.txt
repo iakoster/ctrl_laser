@@ -3,4 +3,4 @@ pandas
 PyInstaller
 PyQt5
 qtawesome
-git+https://github.com/iakoster/pyinstr_iakoster@connection
+git+https://github.com/iakoster/pyinstr_iakoster@v0.0.1.1

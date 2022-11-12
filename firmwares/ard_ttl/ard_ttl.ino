@@ -26,7 +26,7 @@ struct {
 
 struct {
 
-  enum {OFF, SINGLE, PERIODIC} regime = SINGLE; // режим работы лазера
+  enum {OFF, SINGLE, PERIODIC} regime = OFF; // режим работы лазера
   uint8_t regimes_count = 3; // количество возможных режимов
   uint32_t pulse_width = 1; // ширина импульса
   uint32_t pulse_period = 0.01 * timer_frequency - 1; //  100 Гц. -1 т.к. есть такт между pulse_period и 0
